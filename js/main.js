@@ -9,7 +9,7 @@ domCargado = () => {
 // 3. Inserción del value de textarea con mensaje
 
 insertarDiv = () => {
-    origen.insertAdjacentHTML('afterend', '<div id="div-valor-origen" style="background-color: gold; border: 2px solid black; margin-bottom: 20px; padding: 0 5px"><p id="valor-origen">"' + origen.value + '"<p>' + '<p>Este contenido <strong>está listo</strong><br>para ser editado y pasarlo abajo.</p></div>');
+    origen.insertAdjacentHTML('afterend', '<div id="div-valor-origen" style="background-color: gold; border: 2px solid black; margin-bottom: 20px; padding: 0 5px; font-family: Arial, sans serif;"><p id="valor-origen">"' + origen.value + '"<p>' + '<p>Este contenido <strong>está listo</strong><br>para ser editado y pasarlo abajo.</p></div>');
 
     if (origen.value == '') {
         document.getElementById('div-valor-origen').style.display = 'none';
@@ -21,7 +21,7 @@ insertarDiv = () => {
 actualizarDiv = () => {
 
     let valorOrigen = origen.value;
-    document.getElementById('valor-origen').innerText = ('"' + valorOrigen + '"');
+    document.getElementById('valor-origen').innerHTML = ('"' + valorOrigen + '"');
 
     if (origen.value == '') {
         document.getElementById('div-valor-origen').style.display = 'none';
@@ -32,17 +32,29 @@ actualizarDiv = () => {
 
 // 4. Actualización de botones
 
-actualizarBotones = (listaInputs, boton) => {
-    
+actualizarBotones = (listaInputs, vaciar, mayusculas, minusculas) => {
     for (let i = 0; i < listaInputs.length; i++) {
         if (origen.value != '') {
             listaInputs[i].disabled = false;
-            boton.disabled = false
-        } else {
+            minusculas.disabled = false;
+        } else if ((origen.value == '') && (destino.innerHTML != '')){
             listaInputs[i].disabled = true;
-            boton.disabled = true;
+            vaciar.disabled = false;
+            mayusculas.disabled = false;
+            minusculas.disabled = false;
+        } else if ((origen.value == '') && (destino.innerHTML == '')) {
+            listaInputs[i].disabled = true;
+            minusculas.disabled = true;
         };
     };
+
+    vaciar.addEventListener('click', () => {
+        if (origen.value == '') {
+            vaciar.disabled = true;
+            mayusculas.disabled = true;
+            minusculas.disabled = true;
+        }
+    })
 };
 
 // 5. Botones superiores
@@ -55,51 +67,59 @@ botoneraSuperior = () => {
 
     // 5a. Funcionalidad botón reemplazar
     botonReemplazar.addEventListener('click', () => {
-        destino.innerText = origen.value;
+        destino.innerHTML = origen.value;
     });
 
     // 5b. Funcionalidad botón Agregar (una vez)
     botonesAgregar[0].addEventListener('click', () => {
-        destino.innerText += origen.value;
+        destino.innerHTML += origen.value;
     });
 
     // 5c. Funcionalidad botón Agregar (5 veces)
     botonesAgregar[1].addEventListener('click', () => {
-        destino.innerText += origen.value.repeat(5);
+        if (destino.innerHTML == '') {
+            destino.innerHTML += (origen.value + '<br>').repeat(5);
+        } else {
+            destino.innerHTML += (('<br>' + origen.value + '<br>') + (origen.value + '<br>').repeat(4));
+        }
     });
 
     // 5d. Funcionalidad botón Agregar (10 veces)
     botonesAgregar[2].addEventListener('click', () => {
-        destino.innerText += origen.value.repeat(10);
+        if (destino.innerHTML == '') {
+            destino.innerHTML += (origen.value + '<br>').repeat(10);
+        } else {
+            destino.innerHTML += (('<br>' + origen.value + '<br>') + (origen.value + '<br>').repeat(9));
+        };
     });
 
     // 5e. Funcionalidad botón Agregar (n veces)
     botonesAgregar[3].addEventListener('click', () => {
         n = parseInt(prompt('Ingrese cantidad de repeticiones'));
-        destino.innerText += origen.value.repeat(n);
+        if (destino.innerHTML == '') {
+            destino.innerHTML += (origen.value + '<br>').repeat(n);
+        } else {
+            destino.innerHTML += (('<br>' + origen.value + '<br>') + (origen.value + '<br>').repeat(n-1));
+        };
     });
 };
 
 // 6. Botones inferiores
 
-botoneraInferior = (ultimoBoton) => {
-
-    // Botones
-    let botonVaciar = document.getElementsByClassName('btn-vaciar')[0];
-    let botonMayusculas = document.getElementsByClassName('btn-convertir-a-mayusculas')[0];
+botoneraInferior = (vaciar, mayusculas, minusculas) => {
 
     // 6a. Funcionalidad botón vaciar
-    botonVaciar.addEventListener('click', () => {
+    vaciar.addEventListener('click', () => {
         destino.innerText = '';
     });
 
     // 6b. Funcionalidad botón convertir a mayúsculas
-    botonMayusculas.addEventListener('click', () => {
+    mayusculas.addEventListener('click', () => {
         destino.innerText = destino.innerText.toUpperCase();
     });
 
     // 6c. Funcionalidad botón convertir a minúsculas
-    ultimoBoton.addEventListener('click', () => {
+    minusculas.addEventListener('click', () => {
         destino.innerText = destino.innerText.toLowerCase();
     });
 };
@@ -123,8 +143,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let origen = document.getElementById('origen');
     let destino = document.getElementById('destino');
 
+    // Estilo de fuente de destino
+    destino.style.fontFamily = 'Arial, sans serif';
+
     // Variables botones
     let botones = document.getElementsByTagName('input');
+    let botonVaciar = document.getElementsByClassName('btn-vaciar')[0];
+    let botonMayusculas = document.getElementsByClassName('btn-convertir-a-mayusculas')[0];
     let botonMinusculas = document.querySelector('button');
     
     // 2. Aviso de contenido del DOM cargado
@@ -141,14 +166,14 @@ document.addEventListener('DOMContentLoaded', () => {
         actualizarDiv();
         
         // 4. Actualización de botones
-        actualizarBotones(botones,botonMinusculas);
+        actualizarBotones(botones,botonVaciar, botonMayusculas, botonMinusculas);
     })
 
     // 5. Función botones superiores
     botoneraSuperior();
 
     // 6. Función botones inferiores
-    botoneraInferior(botonMinusculas);
+    botoneraInferior(botonVaciar, botonMayusculas,botonMinusculas);
 
     // 7. Agrego "ok" en la lista
     agregarOk();
